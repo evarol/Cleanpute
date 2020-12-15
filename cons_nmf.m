@@ -1,4 +1,4 @@
-function [Z,U,C,obj]=cons_nmf(X,Y,S,M,lambda_1,lambda2,lambda3,lambda4,hard_constraint,covariance_correction,iter)
+function [Z,U,C,obj]=cons_nmf(X,Y,S,M,lambda_1,lambda2,lambda3,lambda4,hard_constraint,covariance_correction,proportion_normalization,iter)
 
 %% Constrained NMF -
 %% Inputs: X - Bulk reads (genes x cells) [non-negative continuous]
@@ -10,7 +10,8 @@ function [Z,U,C,obj]=cons_nmf(X,Y,S,M,lambda_1,lambda2,lambda3,lambda4,hard_cons
 %%         lambda_3 - parameter to control the purity of the single cell to bulk proportions  (scalar) [non-negative continuous]
 %%         lambda_4 - parameter to control goodness of fit of the non-imputed single cell reads (scalar) [non-negative continuous]
 %%         hard_constraint - switch to enforce hard constraint that confident single cell reads will remain the same as inputs (1) or will be imputed as well (0) [0/1 binary]
-%%         covariance_correction - switch to utilzie covariance structure of the single cell reads to decorrelate deconvolution proportions (0/1) [0/1 binary]
+%%         covariance_correction - switch to utilize covariance structure of the single cell reads to decorrelate deconvolution proportions (0/1) [0/1 binary]
+%%         proportion_normalization - switch to normalize proportions, 0 for off, 1 for rows, 2 for columns (0/1/2) 
 %%         iter - iterations to run the algorithm (scalar) [non-negative integer]
 %% Outputs:Z - "pure" single cell profiles (genes x cells) [non-negative continuous]
 %%         U - single to bulk proportions (cells x cells) [non-negative continuous]
@@ -48,7 +49,9 @@ for t=1:iter
     end
     %     Z=Z./sum(Z,1); %% normalization that doens't seem to be necessary.
     U = (U.*(C'*Z'*X + lambda3*M))./(C'*Z'*Z*C*U + lambda3*(M.*U) + lambda_1 + realmin); %% Multiplicative update for U
-    %     U=U./sum(U,1); %% normalization that doens't seem to be necessary.
+    if proportion_normalization>0
+        U=U./sum(U,proportion_normalization); %% normalization that doesn't seem to be necessary.
+    end
     if covariance_correction==1
         C=cov(Z);
     else

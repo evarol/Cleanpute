@@ -1,4 +1,4 @@
-    clear all
+clear all
 clc
 close all
 
@@ -13,7 +13,8 @@ lambda3=1;%% bulk purity
 lambda4=1;%% soft constraint that imputed gene counts should match the confident gene counts
 hard_constraint=1; %%whether the "confident" gene counts should stay as is
 covariance_correction=1; %%whether the covariance structure of single cell reads should be taken into account
-iter=100; %%number of iterations of algorithm
+proportion_normalization=0; %%whether to normalize the proportions to sum to 1 (1 - for rows, 2 - columns, 0 - for off);
+iter=200; %%number of iterations of algorithm
 imputation_cutoff=10; %% Any single cell reads below this will be counted as unreliable and will be imputed
 %%%%%%%%%%%
 
@@ -114,7 +115,7 @@ end
 
 %% Joint deconvolution and imputation - MAIN ROUTINE (algorithmic details inside the cons_nmf.m code)
 
-[Z,U,Sigma,obj]=cons_nmf(Y,X,S,M,lambda,lambda2,lambda3,lambda4,hard_constraint,covariance_correction,iter);
+[Z,U,Sigma,obj]=cons_nmf(Y,X,S,M,lambda,lambda2,lambda3,lambda4,hard_constraint,covariance_correction,proportion_normalization,iter);
 
 
 %% Bulk subtraction
